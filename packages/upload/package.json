@@ -1,0 +1,16 @@
+{
+  "name": "wdzxc-upload",
+  "version": "0.0.1",
+  "description": "wdzxc-upload",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "set PRODUCTION=1 && webpack --progress",
+    "dev-localhost-9090": "webpack-dev-server --progress --profile --colors --inline --port 9090"
+  },
+  "keywords": [
+    "ahahaha"
+  ],
+  "author": "wdzxc",
+  "license": "MIT",
+  "dependencies": {}
+}

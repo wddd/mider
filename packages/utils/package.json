@@ -1,0 +1,36 @@
+{
+  "name": "wd-utils",
+  "version": "0.1.0",
+  "description": "wd-utils",
+  "main": "./index.js",
+  "devDependencies": {
+    "autoprefixer": "^6.6.1",
+    "babel-core": "^6.0.0",
+    "babel-loader": "^6.0.0",
+    "babel-preset-es2015": "^6.0.0",
+    "cross-env": "^3.0.0",
+    "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
+    "html-loader": "^0.4.3",
+    "node-sass": "^3.4.2",
+    "postcss-cssnext": "^2.9.0",
+    "postcss-loader": "^1.1.1",
+    "sass-loader": "^3.2.0",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^2.2.0-rc.3",
+    "webpack-dev-middleware": "^1.6.1",
+    "webpack-dev-server": "^2.1.0-beta.9",
+    "webpack-hot-middleware": "^2.10.0"
+  },
+  "scripts": {
+    "build": "set PRODUCTION=1 && webpack --progress",
+    "dev-localhost-9090": "webpack-dev-server --progress --profile --colors --inline --port 9090"
+  },
+  "keywords": [
+    "ahahaha"
+  ],
+  "author": "wdzxc",
+  "license": "ISC",
+  "dependencies": {}
+}
