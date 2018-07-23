@@ -1,8 +1,8 @@
 {
-  "name": "wdzxc",
+  "name": "mider",
   "version": "0.1.0",
-  "description": "some utils and interface manager",
-  "main": "dist/wdzxc.js",
+  "description": "interface manager",
+  "main": "dist/mider.js",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
