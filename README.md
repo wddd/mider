@@ -10,7 +10,9 @@
 ## InterfaceProxy
 ### Basic Usage
 ```javascript
-let iProxy = new InterfaceProxy({
+import {InterfaceProxy} from 'mider';
+
+const iProxy = new InterfaceProxy({
     user:{
         url:'/user',
         params:{
@@ -49,8 +51,12 @@ iProxy.vip(1);
 ```
 
 ### Default Options
+默认配置会被应用到实例化的 InterfaceProxy 的每个接口方法
+- 每个接口单独的配置项比默认配置项有更高的优先级
 ```javascript
-let iProxyDelete = new InterfaceProxy({
+import {InterfaceProxy} from 'mider';
+
+const iProxyDelete = new InterfaceProxy({
     user:{
         url:'/user',
     },
@@ -60,7 +66,7 @@ let iProxyDelete = new InterfaceProxy({
     comment:{
         url:'/comment',
         params:{
-            id::String,
+            id:String,
             articleId:String,
         }
     }
