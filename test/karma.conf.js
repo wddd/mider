@@ -1,4 +1,5 @@
 // test express server
+const process = require('process');
 const express = require('express');
 const bodyParser = require('body-parser');
 const router = require('./router');
@@ -7,6 +8,9 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.text()); // for parsing text/plain
 app.use(router);
 app.listen(15678);
+
+let coverage = process.argv.indexOf('%COVERAGE%') >= 0;
+
 
 // karma.conf.js
 module.exports = (config) => {
@@ -17,7 +21,7 @@ module.exports = (config) => {
             // all files ending in "_test"
             {pattern: '**/*_test.js', watched: false}
         ],
-        reporters: ['progress', 'coverage-istanbul'],
+        reporters: ['progress'].concat(coverage ? ['coverage-istanbul'] : []),
         preprocessors: {
             // add webpack as preprocessor
             '**/*_test.js': ['webpack', 'sourcemap'],
@@ -36,6 +40,7 @@ module.exports = (config) => {
                             }
                         }]
                     },
+                ].concat(coverage ? [
                     // test coverage loader
                     {
                         test: /\.js$/,
@@ -46,7 +51,7 @@ module.exports = (config) => {
                         enforce: 'post',
                         exclude: /node_modules|vendor|utils|\.spec\.js$/,
                     }
-                ],
+                ] : []),
             }
         },
         coverageIstanbulReporter: {
@@ -63,10 +68,9 @@ module.exports = (config) => {
             'karma-mocha-reporter',
             'karma-sourcemap-loader',
             'karma-webpack',
-            'karma-coverage-istanbul-reporter',
             'karma-chrome-launcher',
             'karma-ie-launcher',
-        ],
+        ].concat(coverage ? ['karma-coverage-istanbul-reporter'] : []),
         proxies: {
             '/api': 'http://localhost:15678/api',
         },

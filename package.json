@@ -39,6 +39,7 @@
   "scripts": {
     "dev": "node build/dev-server.js",
     "karma-test": "karma start test/karma.conf.js",
+    "karma-coverage": "karma start test/karma.conf.js %COVERAGE%",
     "build": "gulp build",
     "build-publish": "gulp build && npm publish"
   },

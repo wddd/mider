@@ -12,8 +12,8 @@ import {objClone, getObjAttr, objCover, objEqual} from "../utils/objectOpt";
 
 function bind(fn, thisArg) {
     return function wrap() {
-        var args = new Array(arguments.length);
-        for (var i = 0; i < args.length; i++) {
+        let args = new Array(arguments.length);
+        for (let i = 0; i < args.length; i++) {
             args[i] = arguments[i];
         }
         return fn.apply(thisArg, args);
@@ -874,15 +874,6 @@ InterfaceProxy.prototype = /**@lends module:InterfaceProxy# */{
             iProxy[pn] = toolkit.buildInterfaceMethod(pn, this);
             iProxy[pn].$options = iProxy[pn].info = configList[pn];
             iProxy[pn].url = iProxy[pn].info.url || (iProxy[pn].info.origin || '') + iProxy[pn].info.pathname;
-            // iProxy[pn].getUrl = (proxyObj => {
-            //     const key = pn;
-            //     return function (query) {
-            //         const options = toolkit.getInterfaceConfig(key, proxyObj);
-            //         var url = options.url || options.origin + options.pathname;
-            //         var params = objCover(objClone(options.params) || {}, query);
-            //         return buildURL({url: url, params: params})
-            //     }
-            // })(this);
         }
     }
 };
