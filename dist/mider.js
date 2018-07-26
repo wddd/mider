@@ -1210,9 +1210,8 @@ function ExtendAxios() {
             axiosOptions.headers["Accept"] = "text/plain, */*";
         }
         // options polyfill
-        if (axiosOptions.method === 'post') {
+        if (axiosOptions.method === 'post' || axiosOptions.method === 'put' || axiosOptions.method === 'patch') {
             axiosOptions.data = axiosOptions.data || axiosOptions.params;
-            axiosOptions.params = null;
             axiosOptions.headers["Content-Type"] = axiosOptions.headers["Content-Type"] || "application/json";
         }
         if (axiosOptions.beforeSend) {
@@ -1232,6 +1231,7 @@ function ExtendAxios() {
 }
 
 var extendAxios = new ExtendAxios();
+var PROXY_METHOD_CONFIG_MARK = "__proxy_method_config_mark__";
 
 //=========================================================
 //  参数说明 & 默认参数
@@ -1428,7 +1428,7 @@ var toolkit = {
                     var attrNum = 0;
                     for (var an in defaultParams) {
                         if (!defaultParams.hasOwnProperty(an)) continue;
-                        if (attrNum++ == multiParamNum) {
+                        if (attrNum++ === multiParamNum) {
                             captureParams[an] = param;
                             multiParamNum++;
                             break;
@@ -1437,7 +1437,6 @@ var toolkit = {
                 }
             });
         }
-
         // URL处理基本参数处理
         var url = function () {
             if (ajaxConfig.url) return ajaxConfig.url;
@@ -1460,7 +1459,7 @@ var toolkit = {
         }
         // --------------------------------------------------------------
         // post 处理 将data转化为json字符串
-        if (ajaxConfig.type.toLocaleLowerCase() == "post" && ajaxConfig.contentType != "application/x-www-form-urlencoded") {
+        if (ajaxConfig.type.toLocaleLowerCase() === "post" && ajaxConfig.contentType !== "application/x-www-form-urlencoded") {
             captureParams = JSON.stringify(captureParams);
         }
 
@@ -1498,8 +1497,9 @@ var toolkit = {
             // 根据各级配置生成最终配置
             var interfaceConfig = toolkit.getInterfaceConfig(key, proxyObj);
             var baseConfig = null;
+
             args = args.filter(function (arg) {
-                if ((0, _isWhat.isObject)(arg) && arg['_proxy_method_config_mark_666_']) {
+                if ((0, _isWhat.isObject)(arg) && arg[PROXY_METHOD_CONFIG_MARK]) {
                     baseConfig = arg;
                     return false;
                 }
@@ -1615,7 +1615,7 @@ var toolkit = {
         ['delete', 'get', 'head', 'options'].forEach(function (method) {
             proxyMethod[method] = function (params, config) {
                 var methodConfig = config || {};
-                methodConfig['_proxy_method_config_mark_666_'] = true;
+                methodConfig[PROXY_METHOD_CONFIG_MARK] = true;
                 methodConfig['method'] = method;
                 methodConfig['params'] = (0, _objectOpt.objCover)(methodConfig['params'] || {}, params || {});
                 return proxyMethod(methodConfig);
@@ -1624,13 +1624,14 @@ var toolkit = {
         ['post', 'put', 'patch'].forEach(function (method) {
             proxyMethod[method] = function (data, config) {
                 var methodConfig = config || {};
-                methodConfig['_proxy_method_config_mark_666_'] = true;
+                methodConfig[PROXY_METHOD_CONFIG_MARK] = true;
                 methodConfig['method'] = method;
-                if ((0, _isWhat.isObject)(methodConfig['data']) && (0, _isWhat.isObject)(data)) {
-                    methodConfig['data'] = (0, _objectOpt.objCover)(methodConfig['data'] || {}, data || {});
-                } else {
-                    methodConfig['data'] = methodConfig['data'] || data;
-                }
+                methodConfig['data'] = data;
+                // if (isObject(methodConfig['data']) && isObject(data)) {
+                //     methodConfig['data'] = objCover(methodConfig['data'] || {}, data || {});
+                // } else {
+                //     methodConfig['data'] = methodConfig['data'] || data;
+                // }
                 return proxyMethod(methodConfig);
             };
         });
@@ -1851,7 +1852,7 @@ var toolkit = {
             return JSON.stringify(a) === JSON.stringify(b);
         };
         RequestManager.prototype.requestEqual = function (a, b) {
-            return this.interfaceConfigEqual(a.interfaceConfig, b.interfaceConfig) && a.ajaxConfig.data == b.ajaxConfig.data;
+            return this.interfaceConfigEqual(a.interfaceConfig, b.interfaceConfig) && a.ajaxConfig.data === b.ajaxConfig.data;
         };
         RequestManager.prototype.removeItem = function (interfaceConfig, ajaxConfig) {
             var _this2 = this;
@@ -1927,7 +1928,7 @@ var toolkit = {
                     if (_this4.requestEqual(request, { interfaceConfig: interfaceConfig, ajaxConfig: ajaxConfig })) {
                         return false;
                     }
-                    if (_this4.interfaceConfigEqual(request.interfaceConfig, interfaceConfig) && request.ajaxConfig != ajaxConfig) {
+                    if (_this4.interfaceConfigEqual(request.interfaceConfig, interfaceConfig) && request.ajaxConfig !== ajaxConfig) {
                         r = request;
                         return true;
                     }
@@ -2054,15 +2055,6 @@ InterfaceProxy.prototype = /**@lends module:InterfaceProxy# */{
             iProxy[pn] = toolkit.buildInterfaceMethod(pn, this);
             iProxy[pn].$options = iProxy[pn].info = configList[pn];
             iProxy[pn].url = iProxy[pn].info.url || (iProxy[pn].info.origin || '') + iProxy[pn].info.pathname;
-            // iProxy[pn].getUrl = (proxyObj => {
-            //     const key = pn;
-            //     return function (query) {
-            //         const options = toolkit.getInterfaceConfig(key, proxyObj);
-            //         var url = options.url || options.origin + options.pathname;
-            //         var params = objCover(objClone(options.params) || {}, query);
-            //         return buildURL({url: url, params: params})
-            //     }
-            // })(this);
         }
     }
 };

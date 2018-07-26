@@ -1,5 +1,5 @@
 ## Description
-接口管理、上传组件、很多很多
+Interface management and utils use on interacting with the server
 
 ## Package List
 
@@ -83,6 +83,76 @@ iProxyDelete.article(10);
 
 iProxyDelete.comment(null,10);
 // DELETE /comment?article=10
+```
+
+### Interface Configs
+```js
+const config = {
+    // {String} 路径，别名 url
+    pathname : '/user',
+    
+    // {String} 基础域名，如果设置了域名，pathname 会被补全域名部分
+    origin : '',
+    
+    // {String} [="get"] 请求方法，别名为 method，可选["get"|"delete"|"head"|"option"|"post"|"put"|"patch"]
+    type : 'get', 
+    
+    // {String} [="json"] 响应数据类型 数据类型，可选["json","jsonp","html"] 
+    dataType : 'json',
+    
+    // {Object} URL query 接受的参数形式， 接口调用时没有对应参数，配置逐级按照对象属性覆盖
+    params : { id : 9 } ,
+    
+    // {Object|Array|String|Number} Request Body 传递的数据内容
+    data : { content : 'hello'},
+    
+    // {String} [="jsonp"] jsonp callback ,需要设置 dataType 为 jsonp 此项才会生效
+    jsonp : 'callback',
+    
+    // {Function} 请求发送前钩子函数，暂时只支持设置 header ...
+    beforeSend : function(xhr){
+        xhr.setRequestHeader('x-token','...');
+    },
+    
+    // {Function} 参数过滤回调删除
+    paramsFilter : function(params) {
+      params.timeStamp = +new Date();
+      return params;
+    },
+    
+    // {String} 解析数据时的数据提取路径
+    // Config { dataPath : 'data.row' }
+    // => Response : { data:{ count:99 , row:[ 1,2,3 ... ] } , success:true }
+    // => .then( data => //   )
+    dataPath : 'data.row',
+    
+    // {Function} 钩子函数，数据预处理功能，处理对象为即将提供给 .then(data) 的 data
+    dataFilter : function(data) {
+      data.date = new Date(data.date);
+      return data;
+    },
+    
+    // {Boolean} 合并，同一个接口，相同参数的请求会合并为一个服务器的请求
+    merge: true,
+    
+    // {Boolean} 排队，同一个接口，所有请求的回调会按照请求发起的顺序排队进行
+    queue: true,
+    
+    // {Boolean} 单一，同一时间，请求中的接口只有最后一个会生效。即只有最后一个请求会触发回调函数
+    single: true,
+    
+    // 描述性配置项
+    
+    // {String}  接口描述名称
+    name : '',
+    
+    // {*}  接口返回数据
+    returns : {
+        id: 9,
+        name: 'foo',
+    }
+    
+}
 ```
 
 ## Authors

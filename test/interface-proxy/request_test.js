@@ -120,7 +120,7 @@ describe("instance method's api", () => {
             done();
         });
     });
-    // 请求同时支持 query 与 request body
+    // 请求支持同时传递 query 与 request body
     it("should support post both query and data", (done) => {
         iProxy.user.post(['hello'], {
             params: {

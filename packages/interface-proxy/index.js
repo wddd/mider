@@ -461,11 +461,6 @@ const toolkit = {
                 methodConfig[PROXY_METHOD_CONFIG_MARK] = true;
                 methodConfig['method'] = method;
                 methodConfig['data'] = data;
-                // if (isObject(methodConfig['data']) && isObject(data)) {
-                //     methodConfig['data'] = objCover(methodConfig['data'] || {}, data || {});
-                // } else {
-                //     methodConfig['data'] = methodConfig['data'] || data;
-                // }
                 return proxyMethod(methodConfig);
             };
         });
