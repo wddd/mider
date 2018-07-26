@@ -93,7 +93,7 @@ describe("instance method's api", () => {
         });
     });
     // 支持 post 使用调用函数的参数传递数据
-    it("should post arg data as text/plain", (done) => {
+    it("should support post string type argument with the request body", (done) => {
         iProxy.jsonRequest.post('wdzxc', {
             headers: {
                 "Content-Type": "text/plain",
@@ -117,6 +117,19 @@ describe("instance method's api", () => {
             expect(data.method).toBe('POST');
             expect(data.body).toEqual(user);
             expect(data.headers['x-token']).toBe('777');
+            done();
+        });
+    });
+    // 请求同时支持 query 与 request body
+    it("should support post both query and data", (done) => {
+        iProxy.user.post(['hello'], {
+            params: {
+                lang: 'zh'
+            }
+        }).then((data) => {
+            expect(data.originalUrl).toBe('/api/json/user?lang=zh');
+            expect(data.query).toEqual({lang: 'zh'});
+            expect(data.body).toEqual(['hello']);
             done();
         });
     });

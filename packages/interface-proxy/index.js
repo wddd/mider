@@ -38,9 +38,8 @@ function ExtendAxios() {
             axiosOptions.headers["Accept"] = "text/plain, */*";
         }
         // options polyfill
-        if (axiosOptions.method === 'post') {
+        if (axiosOptions.method === 'post' || axiosOptions.method === 'put' || axiosOptions.method === 'patch') {
             axiosOptions.data = axiosOptions.data || axiosOptions.params;
-            axiosOptions.params = null;
             axiosOptions.headers["Content-Type"] = axiosOptions.headers["Content-Type"]
                 || "application/json";
         }
@@ -61,6 +60,7 @@ function ExtendAxios() {
 }
 
 const extendAxios = new ExtendAxios();
+const PROXY_METHOD_CONFIG_MARK = "__proxy_method_config_mark__";
 
 //=========================================================
 //  参数说明 & 默认参数
@@ -151,7 +151,7 @@ const toolkit = {
         function doMixin(config) {
             let result = config;
             if (config.mixins) {
-                var mixinTarget = config.mixins;
+                let mixinTarget = config.mixins;
                 if (isString(mixinTarget) || isObject(mixinTarget)) {
                     mixinTarget = [mixinTarget];
                 }
@@ -176,9 +176,9 @@ const toolkit = {
         }
 
         // 拼装配置列表
-        var unitOptions = doMixin(configList[key]);
-        var troopOptions = proxyObj.$additionalOptions;
-        var finalConfig = objCover(objCover(objClone(defaultOptions), troopOptions), unitOptions);
+        let unitOptions = doMixin(configList[key]);
+        let troopOptions = proxyObj.$additionalOptions;
+        let finalConfig = objCover(objCover(objClone(defaultOptions), troopOptions), unitOptions);
         finalConfig.$unitOptions = unitOptions;
         finalConfig.$troopOptions = troopOptions;
         finalConfig.$defaultOptions = defaultOptions;
@@ -261,7 +261,7 @@ const toolkit = {
                     let attrNum = 0;
                     for (let an in defaultParams) {
                         if (!defaultParams.hasOwnProperty(an)) continue;
-                        if (attrNum++ == multiParamNum) {
+                        if (attrNum++ === multiParamNum) {
                             captureParams[an] = param;
                             multiParamNum++;
                             break;
@@ -270,7 +270,6 @@ const toolkit = {
                 }
             });
         }
-
         // URL处理基本参数处理
         let url = (function () {
             if (ajaxConfig.url) return ajaxConfig.url;
@@ -294,8 +293,8 @@ const toolkit = {
         }
         // --------------------------------------------------------------
         // post 处理 将data转化为json字符串
-        if (ajaxConfig.type.toLocaleLowerCase() == "post"
-            && ajaxConfig.contentType != "application/x-www-form-urlencoded") {
+        if (ajaxConfig.type.toLocaleLowerCase() === "post"
+            && ajaxConfig.contentType !== "application/x-www-form-urlencoded") {
             captureParams = JSON.stringify(captureParams);
         }
 
@@ -332,8 +331,9 @@ const toolkit = {
             // 根据各级配置生成最终配置
             let interfaceConfig = toolkit.getInterfaceConfig(key, proxyObj);
             let baseConfig = null;
+
             args = args.filter(function (arg) {
-                if (isObject(arg) && arg['_proxy_method_config_mark_666_']) {
+                if (isObject(arg) && arg[PROXY_METHOD_CONFIG_MARK]) {
                     baseConfig = arg;
                     return false;
                 }
@@ -379,7 +379,7 @@ const toolkit = {
             // .then
             agent.then = function (callback, errCallback) {
                 if (callback) {
-                    var _captureCallback = ajaxConfig.callback;
+                    let _captureCallback = ajaxConfig.callback;
                     ajaxConfig.callback = function () {
                         _captureCallback && _captureCallback.apply(this, arguments);
                         callback.apply(this, arguments);
@@ -392,7 +392,7 @@ const toolkit = {
                         ajaxConfig.errCallback = errCallback;
                     } else {
                         // 参数回调 默认回调 都存在则先执行参数回调再执行链式回调
-                        var _captureErrCallback = ajaxConfig.errCallback;
+                        let _captureErrCallback = ajaxConfig.errCallback;
                         ajaxConfig.errCallback = function () {
                             return (_captureErrCallback && _captureErrCallback.apply(this, arguments))
                                 || errCallback.apply(this, arguments);
@@ -412,8 +412,8 @@ const toolkit = {
 
             // .finally
             agent.finally = function (callback) {
-                var _captureCallback = ajaxConfig.callback;
-                var _captureErrCallback = ajaxConfig.errCallback;
+                let _captureCallback = ajaxConfig.callback;
+                let _captureErrCallback = ajaxConfig.errCallback;
                 ajaxConfig.callback = function () {
                     _captureCallback && _captureCallback.apply(this, arguments);
                     callback.apply(this, arguments);
@@ -449,7 +449,7 @@ const toolkit = {
         ['delete', 'get', 'head', 'options'].forEach(function (method) {
             proxyMethod[method] = function (params, config) {
                 let methodConfig = config || {};
-                methodConfig['_proxy_method_config_mark_666_'] = true;
+                methodConfig[PROXY_METHOD_CONFIG_MARK] = true;
                 methodConfig['method'] = method;
                 methodConfig['params'] = objCover(methodConfig['params'] || {}, params || {});
                 return proxyMethod(methodConfig);
@@ -458,13 +458,14 @@ const toolkit = {
         ['post', 'put', 'patch'].forEach(function (method) {
             proxyMethod[method] = function (data, config) {
                 let methodConfig = config || {};
-                methodConfig['_proxy_method_config_mark_666_'] = true;
+                methodConfig[PROXY_METHOD_CONFIG_MARK] = true;
                 methodConfig['method'] = method;
-                if (isObject(methodConfig['data']) && isObject(data)) {
-                    methodConfig['data'] = objCover(methodConfig['data'] || {}, data || {});
-                } else {
-                    methodConfig['data'] = methodConfig['data'] || data;
-                }
+                methodConfig['data'] = data;
+                // if (isObject(methodConfig['data']) && isObject(data)) {
+                //     methodConfig['data'] = objCover(methodConfig['data'] || {}, data || {});
+                // } else {
+                //     methodConfig['data'] = methodConfig['data'] || data;
+                // }
                 return proxyMethod(methodConfig);
             };
         });
@@ -680,7 +681,7 @@ const toolkit = {
             return JSON.stringify(a) === JSON.stringify(b);
         };
         RequestManager.prototype.requestEqual = function (a, b) {
-            return this.interfaceConfigEqual(a.interfaceConfig, b.interfaceConfig) && a.ajaxConfig.data == b.ajaxConfig.data;
+            return this.interfaceConfigEqual(a.interfaceConfig, b.interfaceConfig) && a.ajaxConfig.data === b.ajaxConfig.data;
         };
         RequestManager.prototype.removeItem = function (interfaceConfig, ajaxConfig) {
             let removed = null;
@@ -748,7 +749,7 @@ const toolkit = {
                     if (this.requestEqual(request, {interfaceConfig: interfaceConfig, ajaxConfig: ajaxConfig})) {
                         return false;
                     }
-                    if (this.interfaceConfigEqual(request.interfaceConfig, interfaceConfig) && request.ajaxConfig != ajaxConfig) {
+                    if (this.interfaceConfigEqual(request.interfaceConfig, interfaceConfig) && request.ajaxConfig !== ajaxConfig) {
                         r = request;
                         return true;
                     }
