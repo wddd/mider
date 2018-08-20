@@ -89,7 +89,7 @@ iProxyDelete.comment(null,10);
 ```js
 const config = {
     // {String} 路径，别名 url
-    pathname : '/user',
+    pathname : '/user/:id',
     
     // {String} 基础域名，如果设置了域名，pathname 会被补全域名部分
     origin : '',
@@ -105,6 +105,13 @@ const config = {
     
     // {Object|Array|String|Number} Request Body 传递的数据内容
     data : { content : 'hello'},
+    
+    // {Object} 路径参数
+    // /api/pathParams/:id
+    // => /api/pathParams/998
+    pathParams: {
+        id: 998,    
+    },
     
     // {String} [="jsonp"] jsonp callback ,需要设置 dataType 为 jsonp 此项才会生效
     jsonp : 'callback',
@@ -130,6 +137,17 @@ const config = {
     dataFilter : function(data) {
       data.date = new Date(data.date);
       return data;
+    },
+    
+    // {Function} 钩子函数，自定义响应数据成功失败状态判断与数据提取
+    // 回调函数的返回值标识了判断的成功状态与数据
+    // { success: true|false , data: any }
+    successHandler : function(res) {
+        return {
+            success: res.statusCode === 0 ? true:false,
+            data: res.data,
+        }
+        // 如果 success 为 false ， 则可以使用 msg 字段替代 data 返回错误详情信息
     },
     
     // {Boolean} 合并，同一个接口，相同参数的请求会合并为一个服务器的请求
