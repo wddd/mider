@@ -72,6 +72,8 @@ export declare class InterfaceProxy {
 
     constructor(methodOptions: AjaxConfigs, commonOptions?: AjaxConfig);
 
+    constructor(methodOptions: AjaxConfigs, commonOptions?: AjaxConfig[]);
+
     [proxyMethod: string]: ProxyMethod;
 }
 

@@ -141,8 +141,9 @@ describe("Interface config", () => {
     });
 
     it("should support error status 404", (done) => {
-        iProxy.notFound().catch(err => {
+        iProxy.notFound().catch((err,errDetail) => {
             expect(err).toBe('Request failed with status code 404');
+            console.log(errDetail);
             done();
         });
     });

@@ -5,7 +5,7 @@
 import $wd from '../packages/utils';
 import FileUploader from '../packages/upload';
 import InterfaceProxy from '../packages/interface-proxy';
-
+import axios from 'axios';
 $wd.FileUploader = FileUploader;
 $wd.InterfaceProxy = InterfaceProxy;
 
@@ -20,5 +20,6 @@ export {
     $wd,
     FileUploader,
     InterfaceProxy,
+    axios
 }
 

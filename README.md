@@ -1,6 +1,9 @@
 ## Description
 Interface management and utils use on interacting with the server
 
+将分散的接口调用配置集中化管理，并提供 mixin 等配置复用模式，
+内部维护简单的请求队列、可以对请求响应自动进行排序、缓存等。
+
 ## Package List
 
 * Utils
