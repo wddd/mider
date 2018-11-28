@@ -22,36 +22,38 @@ function bind(fn, thisArg) {
 
 function ExtendAxios() {
     return bind(function (options) {
-        let axiosOptions = objClone(options);
         let callback = options.success;
         let errCallback = options.error;
         // method & type
-        axiosOptions.method = axiosOptions.method || axiosOptions.type;
+        options.method = options.method || options.type;
         // responseType & dataType
-        axiosOptions.responseType = axiosOptions.responseType || axiosOptions.dataType;
+        options.responseType = options.responseType || options.dataType;
         // headers
-        axiosOptions.headers = axiosOptions.headers || {};
-        if (axiosOptions.responseType === 'html') {
-            axiosOptions.headers["Accept"] = "text/html, */*";
+        options.headers = options.headers || {};
+        if (options.responseType === 'html') {
+            options.headers["Accept"] = "text/html, */*";
         }
-        if (axiosOptions.responseType === 'text') {
-            axiosOptions.headers["Accept"] = "text/plain, */*";
+        if (options.responseType === 'text') {
+            options.headers["Accept"] = "text/plain, */*";
         }
         // options polyfill
-        if (axiosOptions.method === 'post' || axiosOptions.method === 'put' || axiosOptions.method === 'patch') {
-            axiosOptions.data = axiosOptions.data || axiosOptions.params;
-            axiosOptions.headers["Content-Type"] = axiosOptions.headers["Content-Type"]
+        if (options.method === 'post' || options.method === 'put' || options.method === 'patch') {
+            options.data = options.data || options.params;
+            // if (JSON.stringify(axiosOptions.params) === JSON.stringify(axiosOptions.data)) {
+            //     delete axiosOptions.params;
+            // }
+            options.headers["Content-Type"] = options.headers["Content-Type"]
                 || "application/json";
         }
-        if (axiosOptions.beforeSend) {
+        if (options.beforeSend) {
             let fakeXhr = {
                 setRequestHeader(key, value) {
-                    axiosOptions.headers[key] = value;
+                    options.headers[key] = value;
                 }
             };
-            axiosOptions.beforeSend(fakeXhr);
+            options.beforeSend(fakeXhr);
         }
-        axios(axiosOptions).then((response) => {
+        axios(options).then((response) => {
             callback(response.data, response.status);
         }).catch((error) => {
             errCallback(error);
@@ -292,15 +294,13 @@ const toolkit = {
             captureParams = ajaxConfig.paramsFilter(captureParams);
         }
         // --------------------------------------------------------------
-        // post 处理 将data转化为json字符串
-        if (ajaxConfig.type.toLocaleLowerCase() === "post"
-            && ajaxConfig.contentType !== "application/x-www-form-urlencoded") {
-            captureParams = JSON.stringify(captureParams);
-        }
 
+        ajaxConfig.method = ajaxConfig.method || ajaxConfig.type;
         ajaxConfig.url = url;
         ajaxConfig.data = ajaxConfig.data || captureParams;
-        ajaxConfig.params = captureParams;
+        if(!~['post','put','patch'].indexOf(ajaxConfig.method.toLowerCase())){
+            ajaxConfig.params = captureParams;
+        }
         ajaxConfig.callback = captureCallback;
         ajaxConfig.errCallback = captureErrCallback;
         // 生成请求标记
@@ -318,7 +318,6 @@ const toolkit = {
      * @ignore
      */
     buildInterfaceMethod: function (key, proxyObj) {
-        // extendAxios
         /**
          * 构造接口调用函数
          * @param {*=} params        - 查询参数

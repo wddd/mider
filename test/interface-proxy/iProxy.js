@@ -97,6 +97,10 @@ const iProxy = new InterfaceProxy({
         pathname: '/api/post',
         type: 'post',
     },
+    putTest: {
+        pathname: '/api/put',
+        method: 'put',
+    },
     jsonFailAsSuccess: {
         pathname: '/api/json/fail',
         successHandler(res) {

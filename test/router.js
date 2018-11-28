@@ -75,6 +75,9 @@ router.use('/api/text', function (req, res) {
 router.post('/api/post', function (req, res) {
     res.json({success: true, data: req.body});
 });
+router.put('/api/put', function (req, res) {
+    res.json({success: true, data: req.body});
+});
 
 router.use('/api/multiResponse', function (req, res) {
     res.format({

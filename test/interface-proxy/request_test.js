@@ -58,9 +58,17 @@ describe("instance interface requests", () => {
             done();
         })
     });
-    // 请求预处理 - 当请求方法为post时，将query参数自动转移到body
+    // 请求预处理 - 当请求方法为 post 时，将 params 自动转移到 body
     it("should move query params to body when request method is post", (done) => {
         iProxy.postTest({data: 666}).then((data, response) => {
+            expect(data).toEqual({data: 666});
+            expect(response).toEqual({success: true, data: {data: 666}});
+            done();
+        });
+    });
+    // 请求预处理 - 当请求方法为 put 时，将 params 自动转移到 body
+    it("should move query params to body when request method is put", (done) => {
+        iProxy.putTest({data: 666}).then((data, response) => {
             expect(data).toEqual({data: 666});
             expect(response).toEqual({success: true, data: {data: 666}});
             done();
