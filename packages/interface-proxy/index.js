@@ -885,6 +885,5 @@ InterfaceProxy.setDefault = options => {
     objCover(defaultOptions, options);
 };
 
-window.InterfaceProxy = InterfaceProxy;
 export default InterfaceProxy;
 
