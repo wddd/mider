@@ -667,7 +667,8 @@ const toolkit = {
         }
 
         RequestManager.prototype = [];
-        RequestManager.prototype.constructor = RequestManager;
+        // 这个骚操作拖慢了数组性能...
+        // RequestManager.prototype.constructor = RequestManager;
         RequestManager.prototype.requestQueryEqual = function (a, b) {
             return this.interfaceConfigEqual(a.interfaceConfig, b.interfaceConfig) && objEqual(a.ajaxConfig.data, b.ajaxConfig.data);
         };

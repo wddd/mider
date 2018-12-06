@@ -1,6 +1,6 @@
 {
   "name": "mider",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "interface manager",
   "main": "dist/mider.js",
   "devDependencies": {
