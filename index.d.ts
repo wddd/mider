@@ -103,6 +103,13 @@ export interface Utils {
     isFunction(val: any): boolean;
 
     isUndefined(val: any): boolean;
+
+    parseURL(url: string): object;
+
+    buildURL(options: any): string;
+
+    getScript(val: any): any;
+
 }
 
 export const $wd: Utils;
@@ -118,3 +125,4 @@ export declare class FileUploader {
     synergy(remainFiles?: any): any;
 }
 
+export const axios: any;
