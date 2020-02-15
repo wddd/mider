@@ -33,7 +33,7 @@
     "webpack": "^4.4.1",
     "webpack-cli": "^2.0.13",
     "webpack-dev-middleware": "^1.12.2",
-    "webpack-dev-server": "^2.9.4",
+    "webpack-dev-server": "^3.10.3",
     "webpack-hot-middleware": "^2.21.2"
   },
   "scripts": {
