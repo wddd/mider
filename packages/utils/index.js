@@ -14,7 +14,7 @@ import {
 import {objClone, getObjAttr, setObjAttr, objCover, objClear, objEqual, objExtract, objMix} from "./objectOpt";
 import {parseURL, buildURL} from "./url";
 
-require("./src/array-polyfill");
+import("./src/array-polyfill");
 
 const $wd = {};
 

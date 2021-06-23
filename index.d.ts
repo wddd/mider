@@ -82,6 +82,8 @@ export interface Utils {
 
     objClear(obj: object): object;
 
+    objClone(obj: object): object;
+
     objEqual(obj1: object, obj2: object): boolean;
 
     objExtract(obj?: object, options?: Array<string> | string, except?: boolean): object;

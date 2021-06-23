@@ -2,7 +2,7 @@ import {polyfill} from "es6-promise";
 
 polyfill();
 
-import InterfaceProxy from "../../packages/interface-proxy";
+import {InterfaceProxy} from "../../dist/index";
 // clear local storage
 localStorage.clear();
 
