@@ -1,14 +1,13 @@
-//=========================================================
-// Object Operate
-//=========================================================
+/**
+ * @file Object manipulation utilities.
+ */
+
 import {isArray, isFunction, isObject, isString, isUndefined} from "./isWhat";
 
 /**
- * 对象复制
- * 其中的成员如果为对象{object}，则也进行复制操作
- * @param {Object|Array|Number|String} obj 目标对象
- * @returns {*} 返回复制的对象
- * @memberof $wd
+ * Deep clones an object.
+ * @param {Object|Array|number|string} obj - The object to clone.
+ * @returns {*} The cloned object.
  */
 function objClone(obj) {
     let newObj = {};
@@ -30,24 +29,15 @@ function objClone(obj) {
 }
 
 /**
- * 提取object对应路径的属性
- * @param data {object} 提取目标
- * @param path {string}提取路径 'a.b.c'
- * @returns {*} 如果找对对应路径的属性则返回属性值，找不到则返回undefined
- * @memberof $wd
+ * Gets a property of an object by a string path.
+ * @param {Object} data - The object to get the property from.
+ * @param {string} path - The path to the property, e.g., 'a.b.c'.
+ * @returns {*} The property value, or undefined if not found.
  * @example
- *      // 示例
- *      let obj = {
-     *         a: {
-     *             ao: {
-     *                aoo:100
-     *             }
-     *         }
-     *      };
- *      $wd.getObjAttr(obj, 'a.ao');            // => {aoo:100}
- *      $wd.getObjAttr(obj, 'a.ao.aoo');        // => 100
- *      $wd.getObjAttr(obj, 'a.an.aoo');        // => undefined
- *
+ * const obj = { a: { ao: { aoo: 100 } } };
+ * getObjAttr(obj, 'a.ao'); // => { aoo: 100 }
+ * getObjAttr(obj, 'a.ao.aoo'); // => 100
+ * getObjAttr(obj, 'a.an.aoo'); // => undefined
  */
 function getObjAttr(data, path) {
     let result = data;
@@ -63,24 +53,14 @@ function getObjAttr(data, path) {
 }
 
 /**
- * 设置object对应路径的属性
- * 如果中间路径不存在则自动创建
- * @param {object} data  设置目标
- * @param {string} path  设置路径 'a.b.c'
- * @param {*} value 设置的新值
- * @returns {*} 如果找对对应路径的属性则返回属性值
- * @memberof $wd
+ * Sets a property of an object by a string path.
+ * @param {Object} data - The object to set the property on.
+ * @param {string} path - The path to the property, e.g., 'a.b.c'.
+ * @param {*} value - The value to set.
+ * @returns {Object} The modified object.
  * @example
- *
- *    $wd.setObjAttr({
-     *       a: {a1:998},
-     *       b: 2,
-     *       c: {
-     *           c1: 3
-     *       }
-     *    }, 'a.aa.aaa', 998);
- *
- *    // => { a:{aa:{aaa:998},a1:998},b:2...}
+ * setObjAttr({ a: { a1: 998 }, b: 2, c: { c1: 3 } }, 'a.aa.aaa', 998);
+ * // => { a: { a1: 998, aa: { aaa: 998 } }, b: 2, c: { c1: 3 } }
  */
 function setObjAttr(data, path, value) {
     let result = data;
@@ -101,20 +81,15 @@ function setObjAttr(data, path, value) {
 }
 
 /**
- * 对象属性覆盖
- * @param {object} obj1 被覆盖对象 会被修改
- * @param {object} obj2 覆盖对象
- * @param {(string|function)=} process 处理每个覆盖属性的回调 可选参数 会使用函数返回值作为新值
- * @returns {object} 被覆盖处理后的对象
- * @memberof $wd
+ * Overwrites the properties of an object with the properties of another object.
+ * @param {Object} obj1 - The object to be overwritten.
+ * @param {Object} obj2 - The object to overwrite with.
+ * @param {(string|Function)} [process] - A callback function to process each property.
+ * @returns {Object} The overwritten object.
  * @example
- *
- *      // 示例
- *      let obj1 = {a:1,b:2},obj2={a:3,c:4};
- *      $wd.objCover(obj1,obj2);
- *      // => {a:3,b:2,c:4}
- *      // obj1 = {a:3,b:2,c:4}
- *
+ * const obj1 = { a: 1, b: 2 };
+ * const obj2 = { a: 3, c: 4 };
+ * objCover(obj1, obj2); // => { a: 3, b: 2, c: 4 }
  */
 function objCover(obj1, obj2, process) {
     for (let an in obj2) {
@@ -125,19 +100,13 @@ function objCover(obj1, obj2, process) {
 }
 
 /**
- * 对象属性覆盖
- * @param {object} obj 清空的对象 会被修改
- * @param {Number} [degree=VeryBig] 清空的深度
- * @returns {object} 处理后的对象
- * @memberof $wd
+ * Clears the properties of an object.
+ * @param {Object} obj - The object to clear.
+ * @param {number} [degree] - The depth to clear.
+ * @returns {Object} The cleared object.
  * @example
- *
- *      // 示例
- *      let obj1 = {a:1,b:2};
- *      $wd.objClear(obj1,obj2);
- *      // => {a:null,b:null}
- *      // obj1 = {a:null,b:null}
- *
+ * const obj = { a: 1, b: 2 };
+ * objClear(obj); // => { a: null, b: null }
  */
 function objClear(obj, degree) {
     let searchDegree = degree >= 0 ? degree : -1 >>> 1;
@@ -157,22 +126,17 @@ function objClear(obj, degree) {
 }
 
 /**
- * 比较两个对象是否相等
- * 默认进行==比较 ""==false==[]
- * @param obj1 对象1
- * @param obj2 对象2
- * @param attr {(string|array)=} 对象属性   a,b,c ['a','b','c']
- * @returns {boolean}
- * @memberof $wd
+ * Compares two objects for equality.
+ * @param {*} obj1 - The first object.
+ * @param {*} obj2 - The second object.
+ * @param {(string|Array<string>)} [attr] - The attributes to compare.
+ * @returns {boolean} Whether the objects are equal.
  * @example
- *
- *      // 示例
- *      let obj1 = {a:1,b:2},obj2={a:1,c:2},obj3={a:2};
- *      $wd.objEqual(obj1,obj2);
- *      // => true
- *      $wd.objEqual(obj1,obj3);
- *      // => false
- *
+ * const obj1 = { a: 1, b: 2 };
+ * const obj2 = { a: 1, c: 2 };
+ * const obj3 = { a: 2 };
+ * objEqual(obj1, obj2); // => true
+ * objEqual(obj1, obj3); // => false
  */
 function objEqual(obj1, obj2, attr) {
     let attrList = [];
@@ -195,69 +159,48 @@ function objEqual(obj1, obj2, attr) {
 }
 
 /**
- * 对象属性提取
- * 现在主要用于构造提交的表单数据
- * @param {object} obj 被提取属性的目标对象 可以为对象的数组  [obj , ...]
- * @param {(string[]|string)} options 提取规则   数组 : [option , ...]  option: 'oldName=>newName' | 'oldName=newName' | 'oldName'   字符串 : 'oldName=>newName,oldName2=>newName2'
- * @param {(boolean)=} [except=false] 第二个配置项的属性列表是否为排除模式
- * @returns {object|Array.<object>} 使用提取属性构造的新对象或数组
- * @memberof $wd
+ * Extracts properties from an object.
+ * @param {Object|Array<Object>} obj - The object or array of objects to extract properties from.
+ * @param {Array<string>|string} options - The extraction rules.
+ * @param {boolean} [except=false] - Whether to exclude the specified properties.
+ * @returns {Object|Array<Object>} The new object or array with the extracted properties.
  * @example
- *
- *      // 从对象中抽取数据
- *      let obj = {red:255,name:'peter'};
- *      $wd.objExtract(obj,["red=>colorRed","name=>lastName"]);     // => { colorRed:255,lastName:'peter' }
- *      $wd.objExtract(obj,"red=>colorRed,name"]);                  // => { colorRed:255,name:'peter' }
- *
- *      // 从对象数组中抽取数据
- *      let arr = [obj,obj];
- *      $wd.objExtract(obj,["red=>colorRed","lastName"]);           // => [{ colorRed:255,lastName:'peter' },{ colorRed:255,name:'peter' }]
- *
- *      // 自动生成路径
- *      $wd.objExtract({
-     *             a: 1,
-     *             b: { b1: 2 },
-     *             c: 3
-     *          },
- *          "a,b.b1=>bb1,c=>z.x.c.v.b.n.m"
- *      );
- *      // 结果如下 =>
- *      //      {
-     *      //         a: 1,
-     *      //         bb1: 2,
-     *      //         z:{x:{c:{v:{b:{n:{m:3}}}}}}
-     *      //      }
- *
+ * const obj = { red: 255, name: 'peter' };
+ * objExtract(obj, ["red=>colorRed", "name=>lastName"]); // => { colorRed: 255, lastName: 'peter' }
+ * objExtract(obj, "red=>colorRed,name"); // => { colorRed: 255, name: 'peter' }
  */
 function objExtract(obj, options, except) {
-    // 提取 对应名称的属性
     let result = [], temp, originObj = objClone(obj), originOpt = options;
-    isUndefined(options) && (originOpt = []);
-    // 支持 使用逗号分隔的字符串生成配置数组 "oldName=>newName , oldName=>newName"
-    isString(options) && ((temp = options) && (originOpt = options.split(',')));
-    // 支持 从数组提取对象数组 obj [{a:1},{a:2}]  => [{b:1},{b:2}]
-    !isArray(obj) && ((temp = originObj) && (originObj = []) && originObj.push(temp));
+    if (isUndefined(options)) {
+        originOpt = [];
+    }
+    if (isString(options)) {
+        originOpt = options.split(',');
+    }
+    if (!isArray(obj)) {
+        originObj = [obj];
+    }
     originObj.forEach(function (unit) {
-        // except pattern
         if (except) {
             temp = unit;
             originOpt.forEach(function (name) {
                 delete temp[name];
             });
         }
-        // extract pattern
         if (!except) {
             temp = {};
             originOpt.forEach(function (name) {
-                let resolveReg = /([^=>,]+)=[>]?([^=>,]+)/;     // 支持中文
+                let resolveReg = /([^=>,]+)=[>]?([^=>,]+)/;
                 if (resolveReg.test(name)) {
-                    // 支持 'oldName=>newName' 'oldName=newName'
                     let originName = resolveReg.exec(name)[1];
                     let replaceName = resolveReg.exec(name)[2];
-                    !isUndefined(getObjAttr(unit, originName)) && (setObjAttr(temp, replaceName, getObjAttr(unit, originName)));
+                    if (!isUndefined(getObjAttr(unit, originName))) {
+                        setObjAttr(temp, replaceName, getObjAttr(unit, originName));
+                    }
                 } else {
-                    // 支持 'name'
-                    !isUndefined(getObjAttr(unit, name)) && (setObjAttr(temp, name, getObjAttr(unit, name)));
+                    if (!isUndefined(getObjAttr(unit, name))) {
+                        setObjAttr(temp, name, getObjAttr(unit, name));
+                    }
                 }
             });
         }
@@ -267,6 +210,13 @@ function objExtract(obj, options, except) {
     return result;
 }
 
+/**
+ * Mixes the properties of two objects.
+ * @param {Object} options - The base object.
+ * @param {Object} coverOptions - The object to mix in.
+ * @param {number} [degree] - The depth to mix.
+ * @returns {boolean} Whether the mix was successful.
+ */
 function objMix(options, coverOptions, degree) {
     let searchDegree = degree >= 0 ? degree : -1 >>> 1;
     if (searchDegree < 1) return false;
@@ -288,7 +238,6 @@ function objMix(options, coverOptions, degree) {
         if (!isObject(options)) {
             options = {};
         }
-        // keys & symbols
         Object.keys(coverOptions).concat(Object.getOwnPropertySymbols(coverOptions)).forEach(key => {
             if (!objMix(options[key], coverOptions[key], searchDegree - 1)) {
                 options[key] = coverOptions[key];

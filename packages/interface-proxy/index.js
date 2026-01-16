@@ -10,6 +10,12 @@ import axios from 'axios';
 import {isObject, isArray, isFunction, isString, isUndefined} from "../utils/isWhat";
 import {objClone, getObjAttr, objCover, objEqual} from "../utils/objectOpt";
 
+/**
+ * Binds a function to a specific context.
+ * @param {Function} fn - The function to bind.
+ * @param {*} thisArg - The context to bind the function to.
+ * @returns {Function} The bound function.
+ */
 function bind(fn, thisArg) {
     return function wrap() {
         let args = new Array(arguments.length);
@@ -20,6 +26,10 @@ function bind(fn, thisArg) {
     };
 }
 
+/**
+ * Extends axios with additional options and callbacks.
+ * @returns {Function} An extended axios instance.
+ */
 function ExtendAxios() {
     return bind(function (options) {
         let callback = options.success;
@@ -64,28 +74,43 @@ function ExtendAxios() {
 const extendAxios = new ExtendAxios();
 const PROXY_METHOD_CONFIG_MARK = "__proxy_method_config_mark__";
 
-//=========================================================
-//  参数说明 & 默认参数
-//=========================================================
+/**
+ * @typedef {Object} DefaultOptions
+ * @property {string|null} origin - The default domain.
+ * @property {Function} beforeSend - A pre-request callback function.
+ * @property {Function} paramsFilter - A function to filter request parameters.
+ * @property {Function|null} dataFilter - A function to preprocess the data upon a successful response.
+ * @property {Function} callback - The default success callback.
+ * @property {Function} errCallback - The default error callback.
+ * @property {string} type - The default request type.
+ * @property {string} dataType - The default data type.
+ * @property {string} contentType - The default content type.
+ * @property {boolean} traditional - A flag for traditional parameter serialization.
+ * @property {string|null} jsonp - The JSONP callback name.
+ * @property {Object|null} fakeHeaders - Custom headers to be added to the request.
+ */
+
+/**
+ * The default options for the interface proxy.
+ * @type {DefaultOptions}
+ */
 let defaultOptions = {
-    //----------------------------------
-    //  接口数据默认配置
-    //----------------------------------
-    // 默认域名
+    // Default domain
     origin: null,
-    // xhr send 前钩子函数
+    // A pre-request callback function
     beforeSend: new Function,
-    // 参数过滤 - 默认过滤掉null字段
+    // A function to filter request parameters, by default it filters out null fields
     paramsFilter(params) {
         Object.keys(params).forEach(key => {
             if (params[key] === null) delete params[key];
         });
         return params;
     },
-    // 成功回调的数据预处理
+    // A function to preprocess the data upon a successful response
     dataFilter: null,
-    // 默认失败回调
+    // The default success callback
     callback: new Function,
+    // The default error callback
     errCallback: new Function,
     // ajax default
     type: "get",
@@ -98,33 +123,30 @@ let defaultOptions = {
 };
 
 /**
- * 接口配置项
- * @typedef {Object}    OriginAjaxConfig
- * // 基础配置
- * @property {string}   [pathname=]             - 接口路径 路径可以是相对路径也可以是绝对路径，按书写方式区分
- * @property {string}   [url=]                  - url 通常是绝对路径
- * @property {string}   [origin=""]             - 接口域名 如果一个接口存在origin配置，则会和pathname进行拼接作为具体路径。
- * @property {string}   [type="GET"]            - 操作方法 GET|POST
- * @property {string}   [dataType="json"]       - 数据类型 json|jsonp
- * @property {string}   [jsonp="jsonpCallback"] - jsonp 回调函数名
- * @property {string}   [paramsType=""]         - 参数类型
- * @property {function} [paramsFilter=""]       - 参数预处理
- * @property {string}   [dataPath=""]           - 数据路径
- * @property {function} [dataFilter=""]         - 数据预处理
- * @property {object}   [pathParams=]           - 路径参数
- * @property {boolean}  [merge=false]           - 合并
- * @property {boolean}  [queue=false]           - 排队
- * @property {boolean}  [single=false]          - 单一最后有效
- * @property {number}   [validTime=0]           - 有效时间，单位为秒，可以为浮点数
- * @property {*}        [params=null]           - 接口查询参数，{} [] "" ， 如果没有接口调用时没有对应参数，会使用这里配置的默认配置进行补充
- * @property {string}   [name=""]               - 描述接口名称，参考使用
- * @property {*}        [returns=null]          - 接口成功状态返回数据的参考格式，只是针对数据部分。例如: 返回数据:{ success:true,data:{} } => returns : {} （为data对象）
- * // 高级配置
- * @property {function} [errCallback=]          - 默认失败回调函数
- * @property {function} [ajax=]                 - ajax 调用
- * @property {function} [beforeSend=]           - 发送前钩子函数，可以用于修改header等
- * @property {function} [model=]                - 接口模型
- * @property {function} [successHandler=]       - 返回数据成功状态判断过滤器
+ * @typedef {Object} OriginAjaxConfig
+ * @property {string} [pathname] - The interface path. This can be a relative or absolute path.
+ * @property {string} [url] - The URL, which is usually an absolute path.
+ * @property {string} [origin=""] - The domain of the interface. If an origin is configured, it will be concatenated with the pathname to form the full URL.
+ * @property {string} [type="GET"] - The request method, e.g., GET, POST.
+ * @property {string} [dataType="json"] - The data type, e.g., json, jsonp.
+ * @property {string} [jsonp="jsonpCallback"] - The JSONP callback function name.
+ * @property {string} [paramsType=""] - The parameter type.
+ * @property {function} [paramsFilter=""] - A function to preprocess the parameters.
+ * @property {string} [dataPath=""] - The data path.
+ * @property {function} [dataFilter=""] - A function to preprocess the data.
+ * @property {object} [pathParams] - The path parameters.
+ * @property {boolean} [merge=false] - A flag to indicate whether to merge requests.
+ * @property {boolean} [queue=false] - A flag to indicate whether to queue requests.
+ * @property {boolean} [single=false] - A flag to indicate whether only the last request is valid.
+ * @property {number} [validTime=0] - The valid time in seconds.
+ * @property {*} [params=null] - The query parameters for the interface. If no parameters are provided when the interface is called, the default configuration will be used.
+ * @property {string} [name=""] - The name of the interface, for reference.
+ * @property {*} [returns=null] - The reference format of the returned data in a successful state, only for the data part. For example: if the returned data is { success:true,data:{} }, then returns should be {}.
+ * @property {function} [errCallback] - The default error callback function.
+ * @property {function} [ajax] - The ajax call.
+ * @property {function} [beforeSend] - A pre-request hook function that can be used to modify headers, etc.
+ * @property {function} [model] - The interface model.
+ * @property {function} [successHandler] - A filter to determine the success status of the returned data.
  *
  * @example
  * {
@@ -141,15 +163,23 @@ let defaultOptions = {
  * }
  */
 
-// 接口请求装配工具箱
+/**
+ * A toolkit for assembling interface requests.
+ * @namespace
+ */
 const toolkit = {
 
-    // 生成接口最终配置
+    /**
+     * Generates the final interface configuration.
+     * @param {string} key - The key of the interface configuration.
+     * @param {InterfaceProxy} proxyObj - The InterfaceProxy instance.
+     * @returns {Object} The final interface configuration.
+     */
     getInterfaceConfig(key, proxyObj) {
-        // 接口配置列表
+        // A list of all interface configurations
         const configList = objClone(proxyObj.$configMap);
 
-        // 预处理optionsList
+        // Preprocesses the options list
         function doMixin(config) {
             let result = config;
             if (config.mixins) {
@@ -166,7 +196,7 @@ const toolkit = {
                         // console.error("InterfaceProxy Mixin ERROR.");
                     }).forEach(mixin => {
                         if (mixin.mixins) {
-                            // 循环mixin处理
+                            // Handles mixins recursively
                             result = objCover(doMixin(mixin), result);
                         } else {
                             result = objCover(objClone(mixin), objClone(result));
@@ -177,7 +207,7 @@ const toolkit = {
             return result;
         }
 
-        // 拼装配置列表
+        // Assembles the final configuration
         let unitOptions = doMixin(configList[key]);
         let troopOptions = proxyObj.$additionalOptions;
         let finalConfig = objCover(objCover(objClone(defaultOptions), troopOptions), unitOptions);
@@ -186,20 +216,26 @@ const toolkit = {
         finalConfig.$defaultOptions = defaultOptions;
         return finalConfig;
     },
-    // 生成Ajax最终配置
+    /**
+     * Generates the final Ajax configuration.
+     * @param {Array} args - The arguments passed to the interface method.
+     * @param {Object} interfaceConfig - The interface configuration.
+     * @param {Object} baseConfig - The base configuration.
+     * @returns {Object} The final Ajax configuration.
+     */
     getAjaxConfig(args, interfaceConfig, baseConfig) {
-        // 基础AJAX配置
+        // The basic AJAX configuration
         let ajaxConfig = objCover(objClone(interfaceConfig), baseConfig);
         /*----------------------------------------------------
-         支持参数传入格式
+         Supported argument formats:
          > callback
-         > callback,errCallback
-         > params,callback,errCallback
-         > [pArg1,pArg2...],callback,errCallback
-         > 依照Res配置默认构造方法填充未传入参数值
+         > callback, errCallback
+         > params, callback, errCallback
+         > [pArg1, pArg2...], callback, errCallback
+         > Fills in the missing parameter values according to the default constructor method of the Res configuration
          ----------------------------------------------------*/
         let defaultParams = ajaxConfig.params;
-        // 捕获参数
+        // Captures the parameters
         let captureParams = {};
         let captureCallback = null;
         let captureErrCallback = null;
@@ -207,7 +243,8 @@ const toolkit = {
         if (typeof Symbol !== 'undefined') {
             _Symbol = Symbol;
         }
-        // 默认参数值 由接口配置生成 如果默认参数配置的类型为函数，则获取函数执行结果
+        // The default parameter values are generated by the interface configuration.
+        // If the type of the default parameter configuration is a function, the result of the function execution is obtained
         Object.keys(defaultParams || {}).forEach(key => {
             let value = defaultParams[key];
             if (value === Number
@@ -237,12 +274,12 @@ const toolkit = {
                 ajaxConfig.data = objCover(interfaceConfig.data, ajaxConfig.data);
             }
         } else {
-            // 根据args捕获参数
-            // 分析函数传入参数列表，提取 params,callback,errCallback
+            // Captures the parameters based on the arguments
+            // Analyzes the function's incoming parameter list and extracts params, callback, and errCallback
             let multiParamPattern = true;
             let multiParamNum = 0;
             [].forEach.call(args, function (param) {
-                // 提取成功与失败回调函数
+                // Extracts the success and error callback functions
                 if (isFunction(param)) {
                     if (!captureCallback) {
                         captureCallback = param;
@@ -253,12 +290,12 @@ const toolkit = {
                         return;
                     }
                 }
-                // 提取参数列表  单独 {} 配置
+                // Extracts the parameter list and configures it separately
                 if (isObject(param)) {
                     objCover(captureParams, param);
                     multiParamPattern = false;
                 }
-                // 多参数配置
+                // Multi-parameter configuration
                 if (multiParamPattern && !isFunction(param)) {
                     let attrNum = 0;
                     for (let an in defaultParams) {
@@ -272,7 +309,7 @@ const toolkit = {
                 }
             });
         }
-        // URL处理基本参数处理
+        // Handles the URL and basic parameters
         let url = (function () {
             if (ajaxConfig.url) return ajaxConfig.url;
             if (ajaxConfig.origin) {
@@ -280,7 +317,7 @@ const toolkit = {
             }
             else return ajaxConfig.pathname;
         })(ajaxConfig);
-        // url path重构 pathParams
+        // Reconstructs the URL path with pathParams
         let pathParams = ajaxConfig.pathParams;
         if (pathParams) {
             Object.keys(pathParams).forEach(key => {
@@ -289,11 +326,10 @@ const toolkit = {
             });
         }
 
-        // ! 参数过滤器 -------------------------------------------------
+        // Parameter filter
         if (isFunction(ajaxConfig.paramsFilter)) {
             captureParams = ajaxConfig.paramsFilter(captureParams);
         }
-        // --------------------------------------------------------------
 
         ajaxConfig.method = ajaxConfig.method || ajaxConfig.type;
         ajaxConfig.url = url;
@@ -303,31 +339,30 @@ const toolkit = {
         }
         ajaxConfig.callback = captureCallback;
         ajaxConfig.errCallback = captureErrCallback;
-        // 生成请求标记
+        // Generates the request mark
         if (ajaxConfig.validTime > 0) {
             ajaxConfig.requestMark = this.generateDataMark(ajaxConfig);
         }
         return ajaxConfig;
     },
     /**
-     * 生成接口数据交换操作函数
-     * @this module:InterfaceProxy
-     * @param key 单个接口配置
-     * @param proxyObj 接口代理对象配置
-     * @returns {Function}
+     * Builds the interface method for data exchange.
+     * @param {string} key - The key of the interface configuration.
+     * @param {InterfaceProxy} proxyObj - The InterfaceProxy instance.
+     * @returns {Function} The constructed interface method.
      * @ignore
      */
     buildInterfaceMethod: function (key, proxyObj) {
         /**
-         * 构造接口调用函数
-         * @param {*=} params        - 查询参数
-         * @param {*=} callback      - 成功回调
-         * @param {*=} errCallback   - 失败回调
-         * @param {*=} methodConfig  - 代理方法配置
+         * The constructed interface call function.
+         * @param {*} [params] - The query parameters.
+         * @param {*} [callback] - The success callback.
+         * @param {*} [errCallback] - The error callback.
+         * @param {*} [methodConfig] - The proxy method configuration.
          */
         let proxyMethod = function (params, callback, errCallback, methodConfig) {
             let args = [].slice.call(arguments);
-            // 根据各级配置生成最终配置
+            // Generates the final configuration based on the configurations at each level
             let interfaceConfig = toolkit.getInterfaceConfig(key, proxyObj);
             let baseConfig = null;
 
@@ -339,20 +374,20 @@ const toolkit = {
                 return true;
             });
 
-            // 根据参数和接口配置生成ajaxConfig
+            // Generates the ajaxConfig based on the parameters and interface configuration
             let ajaxConfig = toolkit.getAjaxConfig(args, interfaceConfig, baseConfig);
 
-            // 重新包装callback
+            // Rewraps the callback
             let wrapCallback = function () {
                 /**
-                 * 默认失败回调
-                 * 1. 如果没有配置通用回调和专用回调，则使用默认回调
-                 * 2. 如果配置了通用回调，没有专用回调，则使用通用回调
-                 * 3. 如果配置了通用回调和专用回调，则先调用专用回调，专用回调返回true则继续调用通用回调
-                 * 4. 如果配置了通用回调和专用回调，则先调用专用回调，专用回调返回false，则过程结束
-                 * 专用回调[cb,then] -> 通用回调[unitOptions,troopOptions,defaultOptions]
+                 * The default error callback.
+                 * 1. If no general callback and dedicated callback are configured, the default callback is used.
+                 * 2. If a general callback is configured but no dedicated callback, the general callback is used.
+                 * 3. If both a general callback and a dedicated callback are configured, the dedicated callback is called first. If the dedicated callback returns true, the general callback is called.
+                 * 4. If both a general callback and a dedicated callback are configured, the dedicated callback is called first. If the dedicated callback returns false, the process ends.
+                 * Dedicated callback [cb, then] -> General callback [unitOptions, troopOptions, defaultOptions]
                  */
-                // 在存在配置回调 和 默认回调的情况下，包装新的回调函数
+                // Wraps a new callback function if a configured callback and a default callback both exist
                 if (ajaxConfig.errCallback && interfaceConfig.errCallback && (ajaxConfig.errCallback !== interfaceConfig.errCallback)) {
                     ajaxConfig.errCallback = (function (callback, defaultCallback) {
                         return function () {
@@ -360,19 +395,19 @@ const toolkit = {
                         };
                     })(ajaxConfig.errCallback, interfaceConfig.errCallback);
                 }
-                // 无参数回调 则先使用默认回调作为ajax回调
+                // If there is no parameter callback, the default callback is used as the ajax callback
                 if (!ajaxConfig.errCallback) {
                     ajaxConfig.errCallback = interfaceConfig.errCallback;
                 }
                 /**
-                 * 默认成功回调
+                 * The default success callback.
                  */
                 if (!ajaxConfig.callback) {
                     ajaxConfig.callback = interfaceConfig.callback;
                 }
             };
 
-            // Promise形式封装
+            // Encapsulates in a Promise-like form
             let agent = {};
 
             // .then
@@ -385,12 +420,12 @@ const toolkit = {
                     };
                 }
                 if (errCallback) {
-                    // ajax回调 = 默认回调 则 参数回调不存在
-                    // ajax回调替换为 链式回调
+                    // If the ajax callback is the default callback, then the parameter callback does not exist
+                    // Replaces the ajax callback with a chained callback
                     if (ajaxConfig.errCallback === interfaceConfig.errCallback) {
                         ajaxConfig.errCallback = errCallback;
                     } else {
-                        // 参数回调 默认回调 都存在则先执行参数回调再执行链式回调
+                        // If both the parameter callback and the default callback exist, the parameter callback is executed first, and then the chained callback is executed
                         let _captureErrCallback = ajaxConfig.errCallback;
                         ajaxConfig.errCallback = function () {
                             return (_captureErrCallback && _captureErrCallback.apply(this, arguments))
@@ -404,7 +439,7 @@ const toolkit = {
 
             // .catch .error
             agent.catch = agent.error = function (errCallback) {
-                // catch方法是 .then(null,rejection)的包装
+                // The catch method is a wrapper for .then(null, rejection)
                 agent.then(null, errCallback);
                 return agent;
             };
@@ -465,13 +500,17 @@ const toolkit = {
         });
         return proxyMethod;
     },
-    // 发起请求
+    /**
+     * Initiates the request.
+     * @param {Object} interfaceConfig - The interface configuration.
+     * @param {Object} ajaxConfig - The Ajax configuration.
+     */
     doAjax(interfaceConfig, ajaxConfig) {
-        // Ajax 开始前 interceptor
+        // An interceptor before the Ajax request starts
         if (this.beforeAjax(interfaceConfig, ajaxConfig)) return;
-        // 请求响应统一处理
+        // A unified handler for the request response
         let onResponse = (type, data) => {
-            // Ajax 结束后 interceptor
+            // An interceptor after the Ajax request ends
             if (this.afterAjax(interfaceConfig, ajaxConfig)) return;
             let resMap = {
                 success: data => {
@@ -493,7 +532,7 @@ const toolkit = {
             };
             resMap[type] && resMap[type](data);
         };
-        // 绑定请求处理函数
+        // Binds the request processing function
         ajaxConfig.success = function (data, status) {
             onResponse('success', {
                 data: data,
@@ -503,12 +542,12 @@ const toolkit = {
         ajaxConfig.error = function (status) {
             onResponse('error', status);
         };
-        // ------------------------------ 开始请求数据 ----------------------------
-        // 尝试搜索本地数据
+        // Starts requesting data
+        // Tries to search for local data
         if (interfaceConfig.validTime) {
             let localData = this.getAlreadyObtain(ajaxConfig.requestMark);
             if (localData) {
-                // 匹配到本地数据
+                // Matches local data
                 onResponse('localSuccess', {
                     data: localData,
                     status: 200
@@ -516,54 +555,62 @@ const toolkit = {
                 return;
             }
         }
-        // ajax 获取数据
+        // Obtains data via ajax
         if (ajaxConfig.dataType === 'jsonp') {
             AjaxJsonp(objClone(ajaxConfig));
             return;
         }
         (interfaceConfig.ajax || extendAxios)(objClone(ajaxConfig));
     },
-    // 请求前
+    /**
+     * A pre-request handler.
+     * @param {Object} interfaceConfig - The interface configuration.
+     * @param {Object} ajaxConfig - The Ajax configuration.
+     * @returns {boolean} Whether to intercept the request.
+     */
     beforeAjax(interfaceConfig, ajaxConfig) {
         let flag = this.requestManager.start(interfaceConfig, ajaxConfig);
         if (!flag) {
-            // 加载中开关
+            // A switch for the loading state
             if (isFunction(interfaceConfig.optLoadingSwitch)) {
                 interfaceConfig.optLoadingSwitch(true);
             }
         }
         return flag;
     },
-    // 请求后
+    /**
+     * A post-request handler.
+     * @param {Object} interfaceConfig - The interface configuration.
+     * @param {Object} ajaxConfig - The Ajax configuration.
+     * @returns {*}
+     */
     afterAjax(interfaceConfig, ajaxConfig) {
-        // 加载中开关
+        // A switch for the loading state
         if (isFunction(interfaceConfig.optLoadingSwitch)) {
             interfaceConfig.optLoadingSwitch(false);
         }
         return this.requestManager.finish(interfaceConfig, ajaxConfig);
     },
     /**
-     * Ajax数据预处理
-     * 200+>接收数据处理:成功
-     * @param response
-     * @param {} response.data
-     * @param interfaceConfig
-     * @param ajaxConfig
-     * @this module:InterfaceProxy
+     * Preprocesses the Ajax data upon a successful response (200+).
+     * @param {Object} response - The response object.
+     * @param {*} response.data - The response data.
+     * @param {Object} interfaceConfig - The interface configuration.
+     * @param {Object} ajaxConfig - The Ajax configuration.
      * @ignore
      */
     AjaxGetSuccessProcess: function (response, interfaceConfig, ajaxConfig) {
-        // 基础配置
+        // Basic configuration
         let opt = objCover({}, response);
 
-        // 配置项转化
+        // Converts configuration items
         let data = opt.data;
         let status = opt.status;
         let callback = ajaxConfig.callback;
         let errCallback = ajaxConfig.errCallback;
         let isLocalObtain = opt.isLocalObtain;
 
-        // 数据缓存处理
+        // Handles data caching
         if (!isLocalObtain && interfaceConfig.validTime) {
             this.repository.push({
                 key: ajaxConfig.requestMark,
@@ -577,7 +624,7 @@ const toolkit = {
         let callbackEx = null;
         if (callback) {
             callbackEx = function (extractData) {
-                // 提取数据
+                // Extracts data
                 arguments[0] = interfaceConfig.dataPath ? getObjAttr(extractData, interfaceConfig.dataPath) : arguments[0];
                 arguments[0] = isFunction(interfaceConfig.dataFilter) ? interfaceConfig.dataFilter(arguments[0], interfaceConfig.dataType) : arguments[0];
                 return callback.apply(null, arguments);
@@ -585,14 +632,14 @@ const toolkit = {
         }
 
         /*----------------------------------------------------
-         接口返回值类型（200）
-         > 空 : 视为成功
+         Interface return value types (200)
+         > Empty: treated as success
          > {success:true,...}
-         判断后进行成功或失败回调
-         > data | msg  : 成功时尝试提取data，失败时尝试提取msg
+         Determines whether to call the success or error callback
+         > data | msg: tries to extract data on success, tries to extract msg on failure
          ----------------------------------------------------*/
 
-        // 自定义成功状态判断机制
+        // Custom success status judgment mechanism
         if (isFunction(interfaceConfig.successHandler)) {
             let result = interfaceConfig.successHandler(data) || {};
             if (result.success === true) {
@@ -602,13 +649,13 @@ const toolkit = {
                 return errCallback(result.msg, data);
             }
         }
-        // 当返回数据为空 > 直接当做成功
+        // If the returned data is empty, it is treated as success
         if (!data) {
             return callbackEx && callbackEx(null);
         }
-        // 依据success标识提取返回数据
+        // Extracts the returned data based on the success flag
         if (data.success === true) {
-            // 提取data数据
+            // Extracts the data
             if (!isUndefined(data.data)) {
                 return callbackEx && callbackEx(data.data, data, status);
             }
@@ -617,28 +664,26 @@ const toolkit = {
         if (data.success === false) {
             return errCallback && errCallback(data.msg, data);
         }
-        // 当返回数据不包含success字段 > 视为成功
+        // If the returned data does not contain the success field, it is treated as success
         if (isUndefined(data.success)) {
             return callbackEx && callbackEx(data, data);
         }
     },
     /**
-     * 200X>接收数据处理:失败
-     * @param error
-     * @param interfaceConfig
-     * @param ajaxConfig
-     * @this module:InterfaceProxy
+     * Processes the received data upon failure (200X).
+     * @param {Error} error - The error object.
+     * @param {Object} interfaceConfig - The interface configuration.
+     * @param {Object} ajaxConfig - The Ajax configuration.
      * @ignore
      */
     AjaxGetFailProcess: function (error, interfaceConfig, ajaxConfig) {
-        // AJAX 失败
+        // AJAX failure
         ajaxConfig.errCallback && ajaxConfig.errCallback(error.message, error);
     },
     /**
-     * 生成数据标记
-     * @param ajaxConfig
-     * @returns {string}
-     * @this module:InterfaceProxy
+     * Generates a data mark.
+     * @param {Object} ajaxConfig - The Ajax configuration.
+     * @returns {string} The data mark.
      * @ignore
      */
     generateDataMark: function (ajaxConfig) {
@@ -647,10 +692,9 @@ const toolkit = {
         return dataMark;
     },
     /**
-     * 获得数据
-     * @param key
-     * @returns {*}
-     * @this module:InterfaceProxy
+     * Retrieves data.
+     * @param {string} key - The key of the data to retrieve.
+     * @returns {*} The retrieved data.
      * @ignore
      */
     getAlreadyObtain: function (key) {
@@ -660,14 +704,17 @@ const toolkit = {
         }
         return null;
     },
-    // 请求队列
+    /**
+     * The request manager.
+     * @namespace
+     */
     requestManager: (function () {
         function RequestManager() {
-            // 写点啥呢...
+            // ...
         }
 
         RequestManager.prototype = [];
-        // 这个骚操作拖慢了数组性能...
+        // This operation slows down the array performance...
         // RequestManager.prototype.constructor = RequestManager;
         RequestManager.prototype.requestQueryEqual = function (a, b) {
             return this.interfaceConfigEqual(a.interfaceConfig, b.interfaceConfig) && objEqual(a.ajaxConfig.data, b.ajaxConfig.data);
@@ -698,19 +745,25 @@ const toolkit = {
             });
             return removed;
         };
+        /**
+         * Starts a request.
+         * @param {Object} interfaceConfig - The interface configuration.
+         * @param {Object} ajaxConfig - The Ajax configuration.
+         * @returns {boolean|undefined} Returns true if the request is merged, otherwise undefined.
+         */
         RequestManager.prototype.start = function (interfaceConfig, ajaxConfig) {
-            // 唯一
+            // Unique
             if (interfaceConfig.single) {
                 this.removeItem(interfaceConfig);
             }
-            // 合并
+            // Merge
             if (interfaceConfig.merge) {
                 const sameRequest = this.find(r => this.requestQueryEqual(r, {
                     interfaceConfig: interfaceConfig,
                     ajaxConfig: ajaxConfig
                 }));
                 if (sameRequest) {
-                    // 异步执行包装回调的代码 Reason : .then .error .finally
+                    // Asynchronously executes the wrapped callback code. Reason: .then, .error, .finally
                     const callback = sameRequest.ajaxConfig.callback,
                         errCallback = sameRequest.ajaxConfig.errCallback;
                     if (callback) {
@@ -728,17 +781,23 @@ const toolkit = {
                     return true;
                 }
             }
-            // 入队
+            // Enqueue
             this.push.call(this, {
                 interfaceConfig: interfaceConfig,
                 ajaxConfig: ajaxConfig,
                 timeStamp: new Date()
             });
         };
+        /**
+         * Finishes a request.
+         * @param {Object} interfaceConfig - The interface configuration.
+         * @param {Object} ajaxConfig - The Ajax configuration.
+         * @returns {boolean|undefined} Returns true if the request is terminated, otherwise undefined.
+         */
         RequestManager.prototype.finish = function (interfaceConfig, ajaxConfig) {
-            // 排队
+            // Queue
             if (interfaceConfig.queue) {
-                // 找到同接口存在的前一个请求
+                // Finds the previous request with the same interface
                 let r = null;
                 this.find(request => {
                     if (this.requestEqual(request, {interfaceConfig: interfaceConfig, ajaxConfig: ajaxConfig})) {
@@ -752,7 +811,7 @@ const toolkit = {
                 if (r) {
                     const callback = r.ajaxConfig.callback, errCallback = r.ajaxConfig.errCallback;
                     const nextCallback = ajaxConfig.callback, nextErrCallback = ajaxConfig.errCallback;
-                    // 将回调附加到next函数上，等待队列前的请求调用next进行回调触发
+                    // Attaches the callback to the next function and waits for the request in front of the queue to call next to trigger the callback
                     let next;
                     ajaxConfig.callback = function () {
                         const arg = objClone(arguments);
@@ -780,33 +839,51 @@ const toolkit = {
                     }
                 }
             }
-            // 清除
+            // Clear
             if (!this.removeItem(interfaceConfig, ajaxConfig)) {
-                // single : 如果请求已从队列中移除，则终止处理流程
+                // single: if the request has been removed from the queue, the processing flow is terminated
                 if (interfaceConfig.single) return true;
             }
         };
         return new RequestManager();
     })(),
-    // 持久化存储
+    /**
+     * The persistent storage.
+     * @namespace
+     */
     repository: (function () {
         let ls = window.localStorage;
         return {
+            /**
+             * Pushes data to the repository.
+             * @param {Object} params - The parameters.
+             * @param {string} params.key - The key.
+             * @param {number} params.timeStamp - The timestamp.
+             * @param {*} params.data - The data.
+             * @param {number} params.validTime - The valid time.
+             */
             push: function (params) {
-                // 保存新的数据
+                // Saves new data
                 ls[params.key] = JSON.stringify({
                     timeStamp: params.timeStamp,
                     validTime: params.validTime,
                     responseData: params.data
                 });
             },
+            /**
+             * Gets data from the repository.
+             * @param {string} key - The key.
+             * @returns {*} The data.
+             */
             get: function (key) {
                 this.clean();
                 return JSON.parse(ls.getItem(key) || 'null');
             },
-            // 清理过期缓存
+            /**
+             * Clears expired data from the repository.
+             */
             clean: function () {
-                // 清除过期缓存
+                // Clears expired cache
                 for (let i = 0; i < ls.length; i++) {
                     // 42db81629a 3582822d6b b6b83bbe1d 2378e6aeeb
                     if (/\w{40}/.test(ls.key(i))) {
@@ -825,47 +902,44 @@ const toolkit = {
 
 
 /**
- * 接口管理器
- * new InterfaceProxy(interfaceConfig,additionalOptions) 来生成接口操作对象(return)
- * @module InterfaceProxy
- * @param {object}              configMap 接口描述配置信息unitInfo[]
- * @param {OriginAjaxConfig|Array}    additionalOptions 接口基础配置信息
- * @constructor
+ * The InterfaceProxy class.
+ * @class
+ * @param {Object} configMap - The interface description configuration information.
+ * @param {OriginAjaxConfig|Array} additionalOptions - The basic interface configuration information.
  */
 function InterfaceProxy(configMap, additionalOptions) {
-    // 基础配置信息
+    // Basic configuration information
     this.$additionalOptions = (isArray(additionalOptions) ? additionalOptions : [additionalOptions || {}]).reduce((obj1, obj2) => {
         return objCover(objClone(obj1), obj2);
     }, {});
-    // 接口配置JSON
+    // Interface configuration JSON
     this.$configMap = configMap;
-    // 装配工具箱
+    // Toolkit
     this.$toolkit = toolkit;
     // model
     this.$model = this.$additionalOptions.model || null;
-    // 初始化接口 - 自动生成所有接口操作方法
+    // Initializes the interface and automatically generates all interface operation methods
     this.__init__();
 }
 
-InterfaceProxy.prototype = /**@lends module:InterfaceProxy# */{
+InterfaceProxy.prototype = {
     /**
-     * 初始化
-     * @this module:InterfaceProxy
+     * Initializes the InterfaceProxy instance.
      * @ignore
      */
     __init__: function () {
-        // 变量交换
+        // Variable exchange
         let configList = this.$configMap;
-        // 提供 iProxy[name] 操作方法 | 将 构造的getData在调用时的this指向getData[pn]本体
+        // Provides the iProxy[name] operation method and points the `this` of the constructed getData to the getData[pn] itself when called
         let iProxy = this;
-        // 动态生成接口代理对象操作方法
+        // Dynamically generates the interface proxy object operation method
         for (let pn in configList) {
             if (!configList.hasOwnProperty(pn)) continue;
             /**
-             * @typedef {function} interfaceMethod          - 自动生成的接口操作方法
-             * @property {OriginAjaxConfig} interfaceInfo   - 接口信息，来源接口配置
-             * @property {OriginAjaxConfig} info            - 接口信息，来源接口配置
-             * @property {string} url                       - 接口URL
+             * @typedef {function} interfaceMethod
+             * @property {OriginAjaxConfig} interfaceInfo - The interface information from the interface configuration.
+             * @property {OriginAjaxConfig} info - The interface information from the interface configuration.
+             * @property {string} url - The interface URL.
              */
             iProxy[pn] = toolkit.buildInterfaceMethod(pn, this);
             iProxy[pn].$options = iProxy[pn].info = configList[pn];
@@ -874,13 +948,25 @@ InterfaceProxy.prototype = /**@lends module:InterfaceProxy# */{
     }
 };
 
-// 导出Hashes
+/**
+ * The Hashes library.
+ * @type {Object}
+ */
 InterfaceProxy.Hashes = Hashes;
-// 导出Ajax
-// InterfaceProxy.Ajax = Ajax;
+/**
+ * The extended axios instance.
+ * @type {Function}
+ */
 InterfaceProxy.Ajax = extendAxios;
+/**
+ * The axios library.
+ * @type {Object}
+ */
 InterfaceProxy.axios = axios;
-// 修改全局默认配置API
+/**
+ * Sets the default options for the interface proxy.
+ * @param {Object} options - The default options.
+ */
 InterfaceProxy.setDefault = options => {
     objCover(defaultOptions, options);
 };

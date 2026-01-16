@@ -1,19 +1,13 @@
 /**
- * 文件上传组件
- * @author wdzxc
- */
-
-/**
- * 扩展元素组件
  * @module FileUploader
  */
 
-// 依赖
 import {isArray,isFunction,isString} from "../utils/isWhat";
 
 /**
- * 分析返回值  object | string => object
- * @param resContent
+ * Parses the return value from a string to an object.
+ * @param {string} resContent - The response content.
+ * @returns {Object|string} The parsed data.
  */
 function parseRetData(resContent) {
     let retData;
@@ -26,56 +20,46 @@ function parseRetData(resContent) {
 }
 
 /**
- * 文件上传组件
- * @param {Object} config                        - 基础配置对象
- * @param {string} config.uploadUrl                - 文件上传接口URL
- * @param {string=} config.crossOriginSrc           - 跨域上传iframe代理URL
- * @param {string=} config.fileType                - 文件类型 需要小写字母 示例："txt,js,jpg,png,jpeg" | ['text','js']
- * @param {string=} config.fileSize                - 文件大小，单位kb 示例: "10-200" | "10~200" |"200"
- * @param {element} config.uploadElem                - 文件上传表单元素
- * @param {element=} config.imgElem                    - 图片文件预览元素
- * @param {function=} config.callback            - 成功回调
- * @param {function=} config.errCallback            - 失败回调
- * @param {function=} config.uploading            - 上传中回调
- * @param {function=} config.beforeSend            - 上传开始回调
- * @param {function=} config.onchange            - 文件选中、改变回调，可以在这个回调函数中写入 send方法
- * @returns {{send: send}}                            - 返回包含操作方法的对象
+ * A file uploader component.
+ * @param {Object} config - The base configuration object.
+ * @param {string} config.uploadUrl - The file upload API URL.
+ * @param {string} [config.crossOriginSrc] - The cross-origin upload iframe proxy URL.
+ * @param {string|Array<string>} [config.fileType] - The allowed file types, e.g., "txt,js,jpg,png,jpeg" or ['text','js'].
+ * @param {string} [config.fileSize] - The file size limit in KB, e.g., "10-200", "10~200", or "200".
+ * @param {HTMLElement} config.uploadElem - The file upload form element.
+ * @param {HTMLElement} [config.imgElem] - The image preview element.
+ * @param {Function} [config.callback] - The success callback.
+ * @param {Function} [config.errCallback] - The error callback.
+ * @param {Function} [config.uploading] - The progress callback.
+ * @param {Function} [config.beforeSend] - The callback before sending the file.
+ * @param {Function} [config.onchange] - The callback when the file is selected or changed.
+ * @returns {{send: function, extractFiles: function, synergy: function, options: Object}} An object containing the control methods.
  * @constructor
  * @alias module:FileUploader
  * @example
  *   var fp = new FileUploader({
-     *   	uploadUrl : "http://dove.zol.com.cn/saas.pin/ftp/fileUpload",
-     *   	// 上传Form
+     *   	uploadUrl : "http://example.com/upload",
      *   	uploadElem: fileUploadElem,
-     *   	// 文件类型限制
      *   	fileType:"txt,js,jpg,png,jpeg",
-     *   	// 文件大小限制
      *   	fileSize:"10-200",
-     *   	// 跨域模式
-     *   	crossOriginSrc:"http://dove.zol.com.cn/saas.pin/upload/fileSpy.html",
-     *   	// 图片
+     *   	crossOriginSrc:"http://example.com/fileSpy.html",
      *   	imgElem : document.querySelector('img'),
-     *   	//文件上传完成后回调函数
      *   	callback: function(resContent) {
      *   	    console.log(resContent);
      *   	},
      *   	errCallback: function(resContent) {
      *   	    console.log(resContent);
      *   	},
-     *   	// 进度
      *   	uploading: function(percent) {
      *   	    console.log("Uploading:" + percent);
      *   	},
-     *   	// onchange
      *   	onchange:function(){
      *   	    console.log("change");
+     *   	    this.send();
      *   	}
      * });
- * // 发送文件
+ * // Send the file
  * fp.send();
- *
- *
- *
  */
 let FileUploader = function (config) {
     let options = {
@@ -109,13 +93,18 @@ let FileUploader = function (config) {
         options[an] = config[an];
     }
 
-    // 文件类型&大小检查
+    /**
+     * Inspects the file type and size.
+     * @param {File} file - The file to inspect.
+     * @returns {boolean} Whether the file is valid.
+     * @private
+     */
     function fileInspect(file) {
         if (!file) {
-            options.errCallback && options.errCallback("没有选中任何文件");
+            options.errCallback && options.errCallback("No file selected.");
             return false;
         }
-        // 检查文件类型是否符合标准
+        // Checks if the file type meets the standard
         let typeMatch = true;
         if (options.fileType) {
             typeMatch = false;
@@ -129,7 +118,7 @@ let FileUploader = function (config) {
             }
         }
         if (!typeMatch) {
-            options.errCallback && options.errCallback("文件类型错误！正确类型:" + options.fileType.join(','));
+            options.errCallback && options.errCallback("Incorrect file type! Allowed types: " + options.fileType.join(','));
             return false;
         }
         if (isString(options.fileSize)) {
@@ -137,77 +126,95 @@ let FileUploader = function (config) {
             let compareSize = file.size / 1024;
             if (fileLimit.length == 2) {
                 if (compareSize < fileLimit[0] || compareSize > fileLimit[1]) {
-                    options.errCallback && options.errCallback("文件大小错误(" + parseInt(compareSize) + "kb)!尺寸范围：" + fileLimit.join('~') + ' kb');
+                    options.errCallback && options.errCallback("Incorrect file size (" + parseInt(compareSize) + "kb)! Size range: " + fileLimit.join('~') + ' kb');
                     return false;
                 }
             }
             else if (fileLimit.length == 1) {
                 if (compareSize > fileLimit[0]) {
-                    options.errCallback && options.errCallback("文件大小错误(" + parseInt(compareSize) + "kb)！文件需要小于 " + fileLimit[0] + " kb");
+                    options.errCallback && options.errCallback("Incorrect file size (" + parseInt(compareSize) + "kb)! File needs to be smaller than " + fileLimit[0] + " kb");
                     return false;
                 }
             } else {
-                console.log("Error : 文件大小配置错误！");
+                console.log("Error: Incorrect file size configuration!");
                 return false;
             }
         }
         return true;
     }
 
-    /*
-     * XHR上传文件
+    /**
+     * The XMLHttpRequest instance.
+     * @type {XMLHttpRequest}
+     * @private
      */
     let xhr = new XMLHttpRequest();
     options.uploadElem.addEventListener('change', function () {
         previewImage();
     });
 
-    // 创建文件的URL
+    /**
+     * Creates a URL for the file.
+     * @param {Blob} blob - The file blob.
+     * @returns {string} The object URL.
+     * @private
+     */
     let createObjectURL = function (blob) {
         return window[window["webkitURL"] ? 'webkitURL' : 'URL']['createObjectURL'](blob);
     };
 
-    // 预览图片
+    /**
+     * Previews the image.
+     * @param {File} [imageFile] - The image file to preview.
+     * @private
+     */
     function previewImage(imageFile) {
-
-        // 预览参数图片 或 表单图片
+        // Previews the parameter image or the form image
         let file = imageFile || options.uploadElem.files[0];
         if (!fileInspect(file)) {
             options.uploadElem.value = "";
             return;
         }
 
-        // IE10
         if (options.imgElem) {
             options.imgElem.src = createObjectURL(file);
             options.imgElem.style.opacity = 0.2;
         }
 
-        // 触发change事件
-        options.onchange && options.onchange();
+        // Triggers the change event
+        options.onchange && options.onchange.call({ send: returnedObject.send });
     }
 
-    return {
+    const returnedObject = {
+        /**
+         * Extracts files from the input element.
+         * @param {FileList} [targetFiles] - A FileList object to extract files from.
+         * @returns {File|undefined} The extracted file.
+         */
         extractFiles: function (targetFiles) {
             let files = targetFiles || options.uploadElem.files;
             let file = files[0];
             if (!file) {
-                options.errCallback && options.errCallback("没有选中任何文件");
+                options.errCallback && options.errCallback("No file selected.");
                 return;
             }
-            // 处理多选的文件
+            // Handles multiple selected files
             if (options.partner && files.length > 1) {
                 options.partner.synergy([].slice.call(files, 1));
             }
             return file;
         },
+        /**
+         * Sends the file.
+         * @param {FileList} [targetFiles] - A FileList object to send.
+         */
         send: function (targetFiles) {
             let file = this.extractFiles(targetFiles);
-            // 构造表单数据
+            // Constructs the form data
             let formData = new FormData();
             isFunction(options.beforeSend) && options.beforeSend(file);
             formData.append("files", file);
-            // 上传状态
+            // Upload status
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
@@ -218,8 +225,8 @@ let FileUploader = function (config) {
                 }
             };
             /**
-             * 上传进度
-             * @param {{loaded,total}} evt
+             * The upload progress event.
+             * @param {ProgressEvent} evt - The progress event.
              */
             xhr.upload.onprogress = function (evt) {
                 let loaded = evt.loaded;
@@ -232,7 +239,10 @@ let FileUploader = function (config) {
             xhr.open("post", options.uploadUrl);
             xhr.send(formData);
         },
-        // 传递协同 额外文件
+        /**
+         * Passes additional files for synergy.
+         * @param {Array<File>} remainFiles - The remaining files.
+         */
         synergy: function (remainFiles) {
             if (options.partner && remainFiles) {
                 setTimeout(function () {
@@ -241,8 +251,13 @@ let FileUploader = function (config) {
             }
             previewImage(remainFiles[0]);
         },
+        /**
+         * The configuration options.
+         * @type {Object}
+         */
         options: options
-    }
+    };
+    return returnedObject;
 };
 FileUploader.prototype = {};
 

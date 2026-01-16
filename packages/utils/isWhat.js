@@ -1,7 +1,11 @@
 /**
- * 类型检查
- * @param type
- * @returns {function(*=): boolean}
+ * @file Type checking utilities.
+ */
+
+/**
+ * Creates a function that checks if an object is of a specific type.
+ * @param {string} type - The type to check for.
+ * @returns {function(*): boolean} A function that takes an object and returns true if it is of the specified type, false otherwise.
  */
 function isType(type) {
     return function (obj) {
@@ -10,51 +14,45 @@ function isType(type) {
 }
 
 /**
- * 类型检查 Undefined
- * @function
- * @param {*} obj 检查目标
- * @global
- * @returns {boolean}
- * */
+ * Checks if a value is undefined.
+ * @param {*} obj - The value to check.
+ * @returns {boolean} True if the value is undefined, false otherwise.
+ */
 let isUndefined = isType("Undefined");
+
 /**
- * 类型检查 Object
- * @function
- * @param {*} obj 检查目标
- * @global
- * @returns {boolean}
- * */
+ * Checks if a value is an object.
+ * @param {*} obj - The value to check.
+ * @returns {boolean} True if the value is an object, false otherwise.
+ */
 let isObject = isType("Object");
+
 /**
- * 类型检查 Number
- * @function
- * @param {*} obj 检查目标
- * @global
- * @returns {boolean}
- * */
+ * Checks if a value is a number.
+ * @param {*} obj - The value to check.
+ * @returns {boolean} True if the value is a number, false otherwise.
+ */
 let isNumber = isType("Number");
+
 /**
- * 类型检查 Array
- * @function
- * @param {*} obj 检查目标
- * @global
- * @returns {boolean}
- * */
+ * Checks if a value is an array.
+ * @param {*} obj - The value to check.
+ * @returns {boolean} True if the value is an array, false otherwise.
+ */
 let isArray = Array.isArray || isType("Array");
+
 /**
- * 类型检查 Function
- * @function
- * @param {*} obj 检查目标
- * @global
- * @returns {boolean}
- * */
+ * Checks if a value is a function.
+ * @param {*} obj - The value to check.
+ * @returns {boolean} True if the value is a function, false otherwise.
+ */
 let isFunction = isType("Function");
+
 /**
- * 类型检查 String 验证 字符串字面量 和 new String()
- * @param {*} obj 检查目标
- * @global
- * @returns {boolean}
- * */
+ * Checks if a value is a string.
+ * @param {*} obj - The value to check.
+ * @returns {boolean} True if the value is a string, false otherwise.
+ */
 let isString = function (obj) {
     return isType("String")(obj) || obj instanceof String;
 };
