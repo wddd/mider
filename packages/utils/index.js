@@ -1,6 +1,5 @@
 /**
- * 公共函数库
- * @author wdzxc
+ * @file A library of common functions.
  */
 
 import {
@@ -16,28 +15,23 @@ import {parseURL, buildURL} from "./url";
 
 import("./src/array-polyfill");
 
+/**
+ * The main namespace for the library.
+ * @namespace
+ */
 const $wd = {};
 
-//=========================================================
-//  兼容性处理
-//=========================================================
-// console
+// Polyfills for console methods
 console.log || (console.log = new Function());
 console.warn || (console.warn = console.log);
 console.error || (console.error = console.log);
 
-//=========================================================
-// 链式调用 Promise
-// $wd.promise( function(next){ next(data) }).then( function(next,data){ next() })
-// 如果使用 .then.then.sync() 会同步开始调用过程
-//=========================================================
 /**
- * 链式调用&Promise
- * @param callback {function} 回调函数
- * @returns object
+ * A chainable Promise-like implementation.
+ * @param {Function} callback - The callback function.
+ * @returns {Object} A Promise-like object with `then` and `sync` methods.
  * @memberof $wd
  * @example
- *
  * $wd.promise(function (next) {
  *    console.log('1');
  *    next();
@@ -53,9 +47,8 @@ console.error || (console.error = console.log);
  * console.log("start");
  *
  * // => 1 2 3 start
- * // 去掉 .sync()
+ * // Without .sync()
  * // => start 1 2 3
- *
  */
 function promise(callback) {
     let start = false, resolveQueue = [], rejectQueue = [], resolve, reject;
@@ -85,18 +78,15 @@ function promise(callback) {
     };
 }
 
-//=========================================================
-//  异步加载资源
-//=========================================================
 /**
- * 获取JS
- * @param {string} src JS路径
- * @param {function} callback 获取成功后回调
- * @returns {boolean} 返回true表示页面上没有这个JS开始进行加载，返回false表示已经存在这个JS文件不进行加载
+ * Asynchronously loads a JavaScript file.
+ * @param {string} src - The path to the JavaScript file.
+ * @param {Function} callback - The callback function to be executed after the script is loaded. It receives one argument: 'exist' if the script already exists, true on success, and 'error' on failure.
+ * @returns {boolean|undefined} Returns false if the script already exists, otherwise undefined.
  * @memberof $wd
  */
 function getScript(src, callback) {
-    // 页面脚本
+    // Page script
     if (src) {
         let curScripts = document.querySelectorAll('script');
         for (let i = 0; i < curScripts.length; i++) {

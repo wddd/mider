@@ -1,14 +1,14 @@
-//=========================================================
-//  URL解析
-//=========================================================
+/**
+ * @file URL parsing and building utilities.
+ */
+
 import {isArray, isObject} from "./isWhat";
 import {objCover, objExtract} from "./objectOpt";
 
 /**
- * 解析URL 返回 解析数据对象
- * @param {string} url 需要解析的URL
- * @return {{source: *, query, origin: (*|string|string), params: {}, hashQuery, hashParams: {}, protocol: (string|XML|void|*), host, port, file: (*|string), hash: (string|XML|void|*), path: (string|XML|void|*), relative: (*|string), segments: Array, rebuild: rebuild}}
- * @memberof $wd
+ * Parses a URL and returns an object with its components.
+ * @param {string} url - The URL to parse.
+ * @returns {{source: string, query: string, origin: string, params: Object, hashQuery: string, hashParams: Object, protocol: string, host: string, port: string, file: string, hash: string, path: string, relative: string, segments: Array<string>, rebuild: function(): string}} An object containing the parsed URL components.
  */
 function parseURL(url) {
     let a = document.createElement('a');
@@ -20,7 +20,7 @@ function parseURL(url) {
         params: function () {
             let ret = {},
                 seg = a.search.replace(/^\?/, '').split('&');
-            if (seg == false) return {};
+            if (seg[0] === "") return {};
             seg.forEach(function (e, index, arr) {
                 arr[index] = {
                     name: e.split('=')[0],
@@ -88,15 +88,15 @@ function parseURL(url) {
 }
 
 /**
- * 构建URL
- * @param {object} options
- * @param {string} [options.url=]       具体url
- * @param {string} [options.hash=]      hash
- * @param {string} [options.origin=]    域名
- * @param {string} [options.source=]    source
- * @param {string} [options.path=]      路径
- * @param {object} [options.params=]    参数
- * @returns {string}
+ * Builds a URL from an options object.
+ * @param {Object} options - The options for building the URL.
+ * @param {string} [options.url] - The base URL.
+ * @param {string} [options.hash] - The hash.
+ * @param {string} [options.origin] - The origin.
+ * @param {string} [options.source] - The source URL.
+ * @param {string} [options.path] - The path.
+ * @param {Object} [options.params] - The query parameters.
+ * @returns {string} The constructed URL.
  */
 function buildURL(options) {
     let urlInfo = parseURL(options.url || options.source);
@@ -114,7 +114,6 @@ function buildURL(options) {
         });
     });
     return urlInfo.origin + urlInfo.path + (paramsStr ? "?" + paramsStr : "") + (urlInfo.hash ? "#" + urlInfo.hash : "");
-
 }
 
 export {parseURL, buildURL};
