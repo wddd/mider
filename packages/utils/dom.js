@@ -293,8 +293,9 @@ $wd.prototype.remove = function (options) {
  * @memberof $wd
  */
 $wd.prototype.addClass = function (classStr) {
+    const classReg = new RegExp('\\b' + classStr + '\\b');
     this.forEach(function (elem) {
-        if (!new RegExp('\\b' + classStr + '\\b').test(elem.className)) {
+        if (!classReg.test(elem.className)) {
             let classList = elem.className.split(' ');
             classList.push(classStr);
             elem.className = classList.join(' ');
@@ -311,10 +312,11 @@ $wd.prototype.addClass = function (classStr) {
  * @memberof $wd
  */
 $wd.prototype.removeClass = function (classStr) {
+    const classReg = new RegExp('\\b' + classStr + '\\b');
     this.forEach(function (elem) {
-        if (new RegExp('\\b' + classStr + '\\b').test(elem.className)) {
+        if (classReg.test(elem.className)) {
             // 移除class
-            elem.className = elem.className.replace(new RegExp('\\b' + classStr + '\\b'), '');
+            elem.className = elem.className.replace(classReg, '');
             // 整理className
             elem.className = elem.className.replace(/^ +/, '').replace(/ {2,}/g, ' ');
         }
